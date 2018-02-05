@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Wasp</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/sidebar.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper">
+            <ul id="sidebar-nav" class="sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="#">
+                        <img src="/img/icon.png" width="32px"/>
+                        Wasp
+                    </a>
+                </li>
+                <li>
+                    <a href="/"><span class="glyphicon glyphicon-home"></span>Inicio</a>
+                </li>
+                <li >
+                    <a href="#" data-toggle="collapse" data-target="#catalog" data-parent="#sidebar-nav">
+                        <span class="glyphicon glyphicon-book"></span>
+                        Catalogo
+                    </a>
+                    <ul class="sidebar-menu" id="catalog">
+                        <li><a href="/client">Cliente</a></li>
+                        <li><a href="/client">Proveedor</a></li>
+                        <li><a href="/client">Producto</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" data-toggle="collapse" data-target="#inventory" data-parent="#sidebar-nav">
+                        <span class="glyphicon glyphicon-list-alt"></span>
+                        Inventario
+                    </a>
+                     <ul class="sidebar-menu" id="inventory">
+                        <li><a href="/client">Kardex</a></li>
+                        <li><a href="/client">Entrada</a></li>
+                        <li><a href="/client">Salida</a></li>
+                        <li><a href="/client">Ajuste</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" data-toggle="collapse" data-target="#billing" data-parent="#sidebar-nav">
+                        <span class="glyphicon glyphicon-tags"></span>
+                        Facturaci&oacute;n
+                    </a>
+                     <ul class="sidebar-menu" id="billing">
+                        <li><a href="/client">Factura</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <!-- /#sidebar-wrapper -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <div class="container-fluid">
+                <div class="row">
+                    <!--LayoutContent-->
+                </div>
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+
+    <script>
+    $(document).ready(function(){
+        $("#menu-toggle").click(function(e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("toggled");
+        });
+
+    });
+    
+    </script>
+
+</body>
+
+</html>
