@@ -20,7 +20,6 @@
 
 #include <glib.h>
 #include <gio/gio.h>
-#include <json-glib/json-glib.h>
 
 typedef struct _OdnViewRenderContext OdnViewRenderContext;
 

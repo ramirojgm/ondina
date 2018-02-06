@@ -68,6 +68,14 @@ const gchar *	odn_model_class_get_name(OdnModelClass * klass);
 
 gpointer 	odn_model_new(OdnModelClass * klass);
 
+gpointer	odn_model_from_string(OdnModelClass * klass,
+				      const gchar * str,
+				      gssize length,
+				      GError ** error);
+
+gchar *		odn_model_to_string(gpointer model);
+
+
 gboolean	odn_model_contains(gpointer model,
 				   const gchar * name);
 

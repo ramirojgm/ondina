@@ -31,6 +31,10 @@ controller_client_index(ControllerClient * self,
 			OdnContext * context,
 			GError ** error)
 {
+  CommonSession * session = odn_context_get_session(context);
+  if(!common_session_get_authenticated(session))
+    return odn_redirect_result_new("/default/login");
+
   OdnViewModelRoot * model = (OdnViewModelRoot *)odn_model_new(ODN_VIEW_MODEL_ROOT);
   for(guint index = 0;index < 100; index++)
     {

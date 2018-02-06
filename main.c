@@ -25,6 +25,8 @@ main(gint argc,gchar ** argv)
 
   odn_application_bind_inet_port(app,8080);
 
+  odn_application_set_session_type(app,COMMON_TYPE_SESSION);
+
   odn_application_bind_content(app,"/","application/content");
 
   odn_application_bind_dynamic(app,"application/dynamic");

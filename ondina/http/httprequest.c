@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "../ondina.h"
+#include <ondina.h>
 
 const gchar * _http_string_method[] = {"GET","POST","HEAD","PUT","DELETE","TRACE","OPTIONS","CONNECT","PATCH",NULL};
 

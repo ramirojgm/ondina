@@ -20,6 +20,7 @@
 
 #include <ondina.h>
 
+#include <common/session.h>
 #include <data/model.h>
 
 #include <controller/defaultcontroller.h>

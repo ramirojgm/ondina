@@ -90,6 +90,36 @@ odn_content_result_dispose(OdnResult * result)
 }
 
 static void
+odn_redirect_result_prepare(OdnResult * result,
+			   HttpResponse * response,
+			   OdnApplication * app)
+{
+  OdnRedirectResult * self = (OdnRedirectResult*)result;
+  http_response_set_code(response,HTTP_RESPONSE_TEMPORARY_REDIRECT);
+
+  http_package_set_string(HTTP_PACKAGE(response),
+			  "Location",
+			  self->url,
+			  g_utf8_strlen(self->url,1024));
+}
+
+static gconstpointer
+odn_redirect_result_get_content(OdnResult * result,
+			       gsize * size)
+{
+  *size = 0;
+  return NULL;
+}
+
+static void
+odn_redirect_result_dispose(OdnResult * result)
+{
+  OdnRedirectResult * self = (OdnRedirectResult*)result;
+  g_free(self->url);
+}
+
+
+static void
 odn_view_result_prepare(OdnResult * result,
 			   HttpResponse * response,
 			   OdnApplication * app)
@@ -144,6 +174,12 @@ static OdnResultClass odn_content_result_class = {
     odn_content_result_dispose
 };
 
+static OdnResultClass odn_redirect_result_class = {
+    odn_redirect_result_prepare,
+    odn_redirect_result_get_content,
+    odn_redirect_result_dispose
+};
+
 static OdnResultClass odn_view_result_class = {
     odn_view_result_prepare,
     odn_view_result_get_content,
@@ -172,7 +208,10 @@ odn_content_result_new(const gchar * content,
 OdnResult *
 odn_redirect_result_new(const gchar * url)
 {
-  return NULL;
+  OdnRedirectResult * result = g_new(OdnRedirectResult,1);
+  result->parent.klass = &odn_redirect_result_class;
+  result->url = g_strdup(url);
+  return (OdnResult*)result;
 }
 
 OdnResult *
@@ -186,12 +225,6 @@ odn_view_result_new(const gchar * view_name,
   return (OdnResult*)result;
 }
 
-OdnResult *
-odn_json_result_new(JsonNode * node)
-{
-  OdnJSONResult * result = g_new(OdnJSONResult,1);
-  //result->node = json_node_ref(node);
-  return (OdnResult*)result;
-}
+
 
 

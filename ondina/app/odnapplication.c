@@ -242,6 +242,20 @@ odn_application_static_content(OdnApplication * self,
   return found;
 }
 
+static gchar *
+odn_application_generate_uuid()
+{
+  gchar charset[] = "0123456789abcdef";
+  gchar uuid[37] = {0,};
+  for(guint index = 0;index <= 35;index ++) {
+      if(index == 8 || index == 13 || index == 18 || index == 23)
+	uuid[index] = '-';
+      else
+	uuid[index] = charset[g_random_int_range(0,15)];
+  }
+  return g_strdup(uuid);
+}
+
 static gpointer
 odn_application_bind_session(OdnApplication * self,
 			     HttpRequest * request,
@@ -275,7 +289,7 @@ odn_application_bind_session(OdnApplication * self,
 	{
 	  if(uuid)
 	    g_free(uuid);
-	  uuid = g_uuid_string_random();
+	  uuid = odn_application_generate_uuid();
 	}
       while(odn_key_object_find(self->priv->session,uuid));
 

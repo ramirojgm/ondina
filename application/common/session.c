@@ -15,31 +15,38 @@
 	along with the this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef COMMON_SESSION_H_
-#define COMMON_SESSION_H_
 
-#define COMMON_TYPE_SESSION	(common_session_get_type())
-G_DECLARE_FINAL_TYPE(CommonSession,common_session,COMMON,SESSION,GObject)
+#include <application.h>
 
-typedef struct _CommonSessionPrivate CommonSessionPrivate;
-
-struct _CommonSessionClass
+struct _CommonSessionPrivate
 {
-  GObjectClass parent_class;
+  gboolean authenticated;
 };
 
-struct _CommonSession
+G_DEFINE_TYPE_WITH_PRIVATE(CommonSession,common_session,G_TYPE_OBJECT)
+
+static void
+common_session_init(CommonSession * self)
 {
-  GObject parent_instance;
+  self->priv = common_session_get_instance_private(self);
+  self->priv->authenticated = FALSE;
+}
 
-  CommonSessionPrivate * priv;
-};
+static void
+common_session_class_init(CommonSessionClass * klass)
+{
 
+}
 
-GType	common_session_get_type(void);
+void
+common_session_set_authenticated(CommonSession * session,gboolean setting)
+{
+  session->priv->authenticated = setting;
+}
 
-void	 common_session_set_authenticated(CommonSession * session,gboolean setting);
+gboolean
+common_session_get_authenticated(CommonSession * session)
+{
+  return session->priv->authenticated;
+}
 
-gboolean common_session_get_authenticated(CommonSession * session);
-
-#endif /* COMMON_SESSION_H_ */

@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "../ondina.h"
+#include <ondina.h>
 
 typedef struct _HttpResponsePrivate HttpResponsePrivate;
 

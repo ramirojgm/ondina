@@ -20,7 +20,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "../ondina.h"
+#include <ondina.h>
 
 typedef struct _HttpPackageAttribute	HttpPackageAttribute;
 typedef struct _HttpPackagePrivate	HttpPackagePrivate;
