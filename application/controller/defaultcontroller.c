@@ -47,11 +47,25 @@ controller_default_login(ControllerDefault * self,
 }
 
 static OdnResult *
+controller_default_do_login(ControllerDefault * self,
+			OdnContext * context,
+			GError ** error)
+{
+  CommonSession * session = odn_context_get_session(context);
+  common_session_set_authenticated(session,TRUE);
+
+  return odn_redirect_result_new("/client");
+}
+
+static OdnResult *
 controller_default_logout(ControllerDefault * self,
 			OdnContext * context,
 			GError ** error)
 {
-  return NULL;
+  CommonSession * session = odn_context_get_session(context);
+  common_session_set_authenticated(session,FALSE);
+
+  return odn_redirect_result_new("/default/login");
 }
 
 
@@ -69,6 +83,12 @@ controller_default_init(ControllerDefault * self)
 		     "/index",
 		     (OdnControllerAction)controller_default_index,
 		     NULL,
+		     NULL);
+
+ odn_controller_bind(ODN_CONTROLLER(self),
+ 		     "/do_login",
+ 		     (OdnControllerAction)controller_default_do_login,
+ 		     NULL,
 		     NULL);
 
  odn_controller_bind(ODN_CONTROLLER(self),
