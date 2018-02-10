@@ -33,8 +33,25 @@ static OdnModelClass ClientModelClass = {
     sizeof(ClientModel)
 };
 
+static OdnModelClass UserModelClass = {
+    "UserModel",
+    3,
+    {
+	{ "iduser" , ODN_MODEL_TYPE_INT32, NULL,offsetof(UserModel,iduser) },
+	{ "name" , ODN_MODEL_TYPE_STRING, NULL,offsetof(UserModel,name) },
+	{ "password" ,ODN_MODEL_TYPE_STRING, NULL,offsetof(UserModel,password) },
+    },
+    sizeof(UserModel)
+};
+
 OdnModelClass *
 client_model_get_class(void)
 {
   return &ClientModelClass;
+}
+
+OdnModelClass *
+user_model_get_class(void)
+{
+  return &UserModelClass;
 }

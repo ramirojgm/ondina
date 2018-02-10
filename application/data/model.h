@@ -32,7 +32,16 @@ typedef struct
   gchar * contact;
 } ClientModel;
 
+typedef struct
+{
+  OdnModel parent;
+  gint32  iduser;
+  gchar * name;
+  gchar * password;
+} UserModel;
 
 OdnModelClass * client_model_get_class(void);
+
+OdnModelClass * user_model_get_class(void);
 
 #endif /* APPLICATION_MODEL_H_ */

@@ -33,10 +33,10 @@ controller_client_index(ControllerClient * self,
 {
   CommonSession * session = odn_context_get_session(context);
   if(!common_session_get_authenticated(session))
-    return odn_redirect_result_new("/default/login");
+    return odn_redirect_result_new("/");
 
   OdnViewModelRoot * model = (OdnViewModelRoot *)odn_model_new(ODN_VIEW_MODEL_ROOT);
-  for(guint index = 0;index < 100; index++)
+  for(guint index = 0;index < 1000; index++)
     {
       ClientModel * row = odn_model_new(CLIENT_MODEL);
       row->idclient = index + 1;
@@ -54,6 +54,36 @@ controller_client_index(ControllerClient * self,
        model);
 }
 
+static OdnResult *
+controller_client_get(ControllerClient * self,
+			OdnContext * context,
+			GError ** error)
+{
+  CommonSession * session = odn_context_get_session(context);
+  if(common_session_get_authenticated(session))
+    {
+      GList * content = NULL;
+      for(guint index = 0;index < 1000; index++)
+	{
+	  ClientModel * row = odn_model_new(CLIENT_MODEL);
+	  row->idclient = index + 1;
+	  row->name = g_strdup("Ninguna á");
+	  row->ident = g_strdup("Ninguna");
+	  row->phone = g_strdup("Ninguna");
+	  row->address = g_strdup("Ninguna");
+	  row->email = g_strdup("Ninguna");
+	  row->contact = g_strdup("Ninguna");
+	  content = g_list_append(content,row);
+	}
+      return odn_json_result_new(content,TRUE);
+    }
+  else
+    {
+      return NULL;
+    }
+}
+
+
 
 /* client type implementation */
 
@@ -67,6 +97,12 @@ controller_client_init(ControllerClient * self)
  odn_controller_bind(ODN_CONTROLLER(self),
 		     "/index",
 		     (OdnControllerAction)controller_client_index,
+		     NULL,
+		     NULL);
+
+ odn_controller_bind(ODN_CONTROLLER(self),
+		     "/get",
+		     (OdnControllerAction)controller_client_get,
 		     NULL,
 		     NULL);
 

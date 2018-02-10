@@ -16,6 +16,7 @@
  */
 
 #include <ondina.h>
+#include <stdlib.h>
 
 /* model class */
 
@@ -37,13 +38,155 @@ odn_model_new(OdnModelClass * klass)
   return model;
 }
 
+static OdnModelAttribute *
+odn_model_class_find(OdnModelClass * klass,const gchar * name)
+{
+  for(guint index = 0;index < klass->attributes_count;index++)
+    {
+      if(g_strcmp0(klass->attributes[index].name,name) == 0)
+	return &(klass->attributes[index]);
+    }
+  return NULL;
+}
+
+static gchar*
+_odn_get_string(const gchar * str)
+{
+  return g_strndup(str + 1,g_utf8_strlen(str,G_MAXINT32) - 2);
+}
+
+static gpointer
+_odn_model_parse(OdnModelClass * klass,
+		 OdnParser * parser,
+		 GError ** error)
+{
+  gpointer model = odn_model_new(klass);
+  gboolean done = TRUE;
+
+  if(odn_parser_next_word_check(parser,"{"))
+    {
+      do{
+	  if(odn_parser_check_is_string(parser))
+	    {
+	      g_autofree gchar * member_name =  _odn_get_string(odn_parser_next_word(parser,NULL,TRUE));
+	      if(odn_parser_next_word_check(parser,":"))
+		{
+		  OdnModelAttribute * attr = odn_model_class_find(klass,member_name);
+		  if(attr)
+		    {
+		      switch(attr->type)
+		      {
+			case ODN_MODEL_TYPE_BOOLEAN:
+			  if(g_strcmp0("true",odn_parser_next_word(parser,NULL,TRUE)) == 0)
+			    *((gboolean*)(model + attr->offset)) = TRUE;
+			  else
+			    *((gboolean*)(model + attr->offset)) = FALSE;
+			  break;
+			case ODN_MODEL_TYPE_CHAR:
+			  if(odn_parser_next_word_check(parser,"null"))
+			    *((gchar*)(model + attr->offset)) = 0;
+			  else
+			    *((gchar*)(model + attr->offset)) = *(odn_parser_next_word(parser,NULL,TRUE) + 1);
+			  break;
+			case ODN_MODEL_TYPE_STRING:
+			  {
+			    gchar * str ;
+			    if(odn_parser_next_word_check(parser,"null"))
+			      str = NULL;
+			    else if(odn_parser_check_is_string(parser))
+			      str = _odn_get_string(odn_parser_next_word(parser,NULL,TRUE));
+			    else
+			      str = g_strdup(odn_parser_next_word(parser,NULL,TRUE));
+			    *((gchar**)(model + attr->offset)) = str;
+			  }
+			  break;
+			case ODN_MODEL_TYPE_FLOAT:
+			  *((gfloat*)(model + attr->offset)) = atof(odn_parser_next_word(parser,NULL,TRUE));
+			  break;
+			case ODN_MODEL_TYPE_DOUBLE:
+			  *((gdouble*)(model + attr->offset)) = atof(odn_parser_next_word(parser,NULL,TRUE));
+			  break;
+			case ODN_MODEL_TYPE_INT16:
+			  *((gint16*)(model + attr->offset)) = atoi(odn_parser_next_word(parser,NULL,TRUE));
+			  break;
+			case ODN_MODEL_TYPE_INT32:
+			  *((gint32*)(model + attr->offset)) = atoi(odn_parser_next_word(parser,NULL,TRUE));
+			  break;
+			case ODN_MODEL_TYPE_INT64:
+			  *((gint64*)(model + attr->offset)) = atoi(odn_parser_next_word(parser,NULL,TRUE));
+			  break;
+			case ODN_MODEL_TYPE_LIST:
+			  if(odn_parser_next_word_check(parser,"null"))
+			    continue;
+			  else if(odn_parser_next_word_check(parser,"["))
+			    {
+			      do
+				{
+				  odn_parser_next_word(parser,NULL,TRUE);
+				}
+			      while(odn_parser_next_word_check(parser,",") && !odn_parser_is_end(parser));
+			      if(done)
+				done = odn_parser_next_word_check(parser,"]");
+			    }
+			  else
+			    {
+			      done = FALSE;
+			      break;
+			    }
+			  break;
+		      }
+		    }
+		}
+	      else
+		{
+		  done = FALSE;
+		  break;
+		}
+	    }
+	  else
+	    {
+	      done = FALSE;
+	      break;
+	    }
+
+      } while (odn_parser_next_word_check(parser,",") && !odn_parser_is_end(parser));
+
+      if(done)
+      	done = odn_parser_next_word_check(parser,"}");
+    }
+  else
+    {
+      done = FALSE;
+    }
+
+
+  if(done)
+    {
+      return model;
+    }
+  else
+    {
+      *error = g_error_new(
+	  g_quark_from_static_string("odn-model-error"),
+	  0,
+	  "bad syntaxes exception");
+
+      odn_model_free(model);
+      return NULL;
+    }
+}
+
 gpointer
 odn_model_from_string(OdnModelClass * klass,
 		      const gchar * str,
 		      gssize length,
 		      GError ** error)
 {
-  return NULL;
+  OdnParser * p = odn_parser_new();
+  odn_parser_parse(p,str,length);
+  gpointer model = _odn_model_parse(klass,p,error);
+  g_object_unref(p);
+  return model;
 }
 
 
@@ -63,7 +206,7 @@ odn_model_to_string(gpointer model)
       else
 	g_string_append(buffer,",");
 
-      g_string_printf(buffer,"\"%s\":",attr->name);
+      g_string_append_printf(buffer,"\"%s\":",attr->name);
       switch(attr->type)
       {
 	case ODN_MODEL_TYPE_BOOLEAN:
@@ -98,7 +241,6 @@ odn_model_to_string(gpointer model)
 	    GList * list = g_list_first(*((GList**)(model + attr->offset)));
 	    g_string_append(buffer,"[");
 	    for(GList * iter = list;iter;iter = g_list_next(iter)){
-
 		if(iter != list)
 		  g_string_append(buffer,",");
 		if(iter->data)

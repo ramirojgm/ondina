@@ -113,6 +113,10 @@ GList *	 	odn_model_get_list(gpointer model,
 gpointer 	odn_model_add(gpointer model,
 				 const gchar * name);
 
+void	 	odn_model_add_null(gpointer model,
+				   const gchar * name);
+
+
 void	 	odn_model_remove(gpointer model,
 				 const gchar * name,
 				 gpointer data);

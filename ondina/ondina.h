@@ -34,6 +34,7 @@ typedef enum
 #include "http/httprequest.h"
 #include "http/httpresponse.h"
 
+#include "app/odnparser.h"
 #include "app/odnmodel.h"
 #include "app/odncache.h"
 #include "app/odnapplication.h"

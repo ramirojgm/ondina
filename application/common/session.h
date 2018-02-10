@@ -18,6 +18,8 @@
 #ifndef COMMON_SESSION_H_
 #define COMMON_SESSION_H_
 
+#include <sqlite3.h>
+
 #define COMMON_TYPE_SESSION	(common_session_get_type())
 G_DECLARE_FINAL_TYPE(CommonSession,common_session,COMMON,SESSION,GObject)
 
@@ -41,5 +43,7 @@ GType	common_session_get_type(void);
 void	 common_session_set_authenticated(CommonSession * session,gboolean setting);
 
 gboolean common_session_get_authenticated(CommonSession * session);
+
+sqlite3 * common_session_get_database(CommonSession * session);
 
 #endif /* COMMON_SESSION_H_ */

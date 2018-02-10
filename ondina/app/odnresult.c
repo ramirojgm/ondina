@@ -69,12 +69,15 @@ odn_json_result_prepare(OdnResult * result,
   http_package_set_string(HTTP_PACKAGE(response),
 			  "Content-Type",
 			  "application/json",
-			  15);
-  if(self->is_list)
+			  16);
+  if(self->is_array)
     {
       GString * buffer = g_string_new("[");
-      for(GList * iter = g_list_first(self->data); iter; iter = g_list_next(iter))
+      GList * first = g_list_first(self->data);
+      for(GList * iter = first; iter; iter = g_list_next(iter))
 	{
+	  if(iter != first)
+	    g_string_append(buffer,",");
 	  if(iter->data)
 	    {
 	      gchar * str = odn_model_to_string(iter->data);
@@ -112,7 +115,7 @@ odn_json_result_dispose(OdnResult * result)
 {
   OdnJSONResult * self = (OdnJSONResult*)result;
   g_free(self->result);
-  if(self->is_list)
+  if(self->is_array)
     g_list_free_full(self->data,odn_model_free);
   else
     odn_model_free(self->data);
@@ -295,7 +298,7 @@ odn_json_result_new(gpointer model,gboolean is_list)
 {
   OdnJSONResult * result = g_new(OdnJSONResult,1);
   result->parent.klass = &odn_json_result_class;
-  result->is_list = is_list;
+  result->is_array = is_list;
   result->data = model;
   return (OdnResult*)result;
 }

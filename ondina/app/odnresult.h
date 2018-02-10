@@ -60,7 +60,7 @@ typedef struct
   OdnResult parent;
 
   /* data */
-  gboolean is_list;
+  gboolean is_array;
   gpointer data;
   gchar * result;
 } OdnJSONResult;
@@ -79,7 +79,6 @@ typedef struct
 
   /* data */
   gchar * name;
-  gboolean is_array;
   gpointer data;
 
   /* result */
@@ -109,8 +108,8 @@ OdnResult * 	odn_content_result_new(const gchar * content,
 
 OdnResult * 	odn_redirect_result_new(const gchar * url);
 
-OdnResult * 	odn_view_result_new(const gchar * view_name,gpointer data,gboolean is_list);
+OdnResult * 	odn_view_result_new(const gchar * view_name,gpointer data);
 
-OdnResult * 	odn_json_result_new(gpointer data,gboolean is_list);
+OdnResult * 	odn_json_result_new(gpointer data,gboolean is_array);
 
 #endif /* ONDINA_RESULT_H_ */
