@@ -109,8 +109,8 @@ OdnResult * 	odn_content_result_new(const gchar * content,
 
 OdnResult * 	odn_redirect_result_new(const gchar * url);
 
-OdnResult * 	odn_view_result_new(const gchar * view_name,gpointer data);
+OdnResult * 	odn_view_result_new(const gchar * view_name,gpointer data,gboolean is_list);
 
-OdnResult * 	odn_view_list_result_new(const gchar * view_name,gpointer data);
+OdnResult * 	odn_json_result_new(gpointer data,gboolean is_list);
 
 #endif /* ONDINA_RESULT_H_ */

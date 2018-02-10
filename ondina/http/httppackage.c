@@ -210,7 +210,7 @@ void
 http_package_set_int64(HttpPackage * package,const gchar * name,gint64 value)
 {
 	static gchar string_int64[100];
-	sprintf(string_int64,"%ld",value);
+	sprintf(string_int64,"%lld",value);
 	http_package_set_string(package,name,string_int64,-1);
 }
 
