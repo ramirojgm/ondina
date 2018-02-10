@@ -60,7 +60,9 @@ typedef struct
   OdnResult parent;
 
   /* data */
-  OdnModel * data;
+  gboolean is_list;
+  gpointer data;
+  gchar * result;
 } OdnJSONResult;
 
 typedef struct

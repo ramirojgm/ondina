@@ -37,6 +37,94 @@ odn_model_new(OdnModelClass * klass)
   return model;
 }
 
+gpointer
+odn_model_from_string(OdnModelClass * klass,
+		      const gchar * str,
+		      gssize length,
+		      GError ** error)
+{
+  return NULL;
+}
+
+
+gchar *
+odn_model_to_string(gpointer model)
+{
+  GString * buffer = g_string_new("{");
+
+  OdnModelClass * klass = ((OdnModel*)model)->klass;
+  gboolean is_first = TRUE;
+
+  for(guint index = 0;index < klass->attributes_count;index++)
+    {
+      OdnModelAttribute * attr = &(klass->attributes[index]);
+      if(is_first)
+	is_first = FALSE;
+      else
+	g_string_append(buffer,",");
+
+      g_string_printf(buffer,"\"%s\":",attr->name);
+      switch(attr->type)
+      {
+	case ODN_MODEL_TYPE_BOOLEAN:
+	  g_string_append(buffer,*((gboolean*)(model + attr->offset)) ? "true": "false");
+	  break;
+	case ODN_MODEL_TYPE_CHAR:
+	  g_string_append_printf(buffer,"\"%c\"",*((gchar*)(model + attr->offset)));
+	  break;
+	case ODN_MODEL_TYPE_STRING:
+	  if(*((gchar**)(model + attr->offset)))
+	    g_string_append_printf(buffer,"\"%s\"",*((gchar**)(model + attr->offset)));
+	  else
+	    g_string_append(buffer,"null");
+	  break;
+	case ODN_MODEL_TYPE_FLOAT:
+	  g_string_append_printf(buffer,"%g",*((gfloat*)(model + attr->offset)));
+	  break;
+	case ODN_MODEL_TYPE_DOUBLE:
+	  g_string_append_printf(buffer,"%g",*((gdouble*)(model + attr->offset)));
+	  break;
+	case ODN_MODEL_TYPE_INT16:
+	  g_string_append_printf(buffer,"%d",*((gint16*)(model + attr->offset)));
+	  break;
+	case ODN_MODEL_TYPE_INT32:
+	  g_string_append_printf(buffer,"%d",*((gint32*)(model + attr->offset)));
+	  break;
+	case ODN_MODEL_TYPE_INT64:
+	  g_string_append_printf(buffer,"%ld",*((gint64*)(model + attr->offset)));
+	  break;
+	case ODN_MODEL_TYPE_LIST:
+	  {
+	    GList * list = g_list_first(*((GList**)(model + attr->offset)));
+	    g_string_append(buffer,"[");
+	    for(GList * iter = list;iter;iter = g_list_next(iter)){
+
+		if(iter != list)
+		  g_string_append(buffer,",");
+		if(iter->data)
+		  {
+		    gchar * model_string = odn_model_to_string(iter->data);
+		    g_string_append(buffer,model_string);
+		    g_free(model_string);
+		  }
+		else
+		  {
+		    g_string_append(buffer,"null");
+		  }
+	    }
+	    g_string_append(buffer,"]");
+	  }
+	  break;
+	case ODN_MODEL_TYPE_INVALID:
+	  g_string_append(buffer,"undefined");
+	  break;
+      }
+    }
+  g_string_append(buffer,"}");
+  return g_string_free(buffer,FALSE);
+}
+
+
 static OdnModelAttribute *
 odn_model_find(gpointer model,const gchar * name)
 {

@@ -61,6 +61,65 @@ odn_result_free(OdnResult * result)
 /* result class */
 
 static void
+odn_json_result_prepare(OdnResult * result,
+		       HttpResponse * response,
+		       OdnApplication * app)
+{
+  OdnJSONResult * self = (OdnJSONResult*)result;
+  http_package_set_string(HTTP_PACKAGE(response),
+			  "Content-Type",
+			  "application/json",
+			  15);
+  if(self->is_list)
+    {
+      GString * buffer = g_string_new("[");
+      for(GList * iter = g_list_first(self->data); iter; iter = g_list_next(iter))
+	{
+	  if(iter->data)
+	    {
+	      gchar * str = odn_model_to_string(iter->data);
+	      g_string_append(buffer,str);
+	      g_free(str);
+	    }
+	  else
+	    {
+	      g_string_append(buffer,"null");
+	    }
+	}
+      g_string_append(buffer,"]");
+      self->result = g_string_free(buffer,FALSE);
+    }
+  else
+    {
+      if(self->data)
+	  self->data = odn_model_to_string(self->data);
+      else
+	  self->data = g_strdup("null");
+    }
+}
+
+static gconstpointer
+odn_json_result_get_content(OdnResult * result,
+			       gsize * size)
+{
+  OdnJSONResult * self = (OdnJSONResult*)result;
+  *size = g_utf8_strlen(self->result,G_MAXINT32);
+  return self->result;
+}
+
+static void
+odn_json_result_dispose(OdnResult * result)
+{
+  OdnJSONResult * self = (OdnJSONResult*)result;
+  g_free(self->result);
+  if(self->is_list)
+    g_list_free_full(self->data,odn_model_free);
+  else
+    odn_model_free(self->data);
+}
+
+
+static void
 odn_content_result_prepare(OdnResult * result,
 			   HttpResponse * response,
 			   OdnApplication * app)
@@ -174,6 +233,12 @@ static OdnResultClass odn_content_result_class = {
     odn_content_result_dispose
 };
 
+static OdnResultClass odn_json_result_class = {
+    odn_json_result_prepare,
+    odn_json_result_get_content,
+    odn_json_result_dispose
+};
+
 static OdnResultClass odn_redirect_result_class = {
     odn_redirect_result_prepare,
     odn_redirect_result_get_content,
@@ -225,6 +290,12 @@ odn_view_result_new(const gchar * view_name,
   return (OdnResult*)result;
 }
 
-
-
-
+OdnResult *
+odn_json_result_new(gpointer model,gboolean is_list)
+{
+  OdnJSONResult * result = g_new(OdnJSONResult,1);
+  result->parent.klass = &odn_json_result_class;
+  result->is_list = is_list;
+  result->data = model;
+  return (OdnResult*)result;
+}
