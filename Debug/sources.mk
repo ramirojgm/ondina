@@ -23,9 +23,10 @@ CPP_DEPS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
-ondina/http \
-ondina/app \
-. \
-application/data \
+application/common \
 application/controller \
+application/data \
+. \
+ondina/app \
+ondina/http \
 

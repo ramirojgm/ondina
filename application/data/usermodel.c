@@ -18,21 +18,6 @@
 
 #include <application.h>
 
-static OdnModelClass ClientModelClass = {
-    "ClientModel",
-    7,
-    {
-	{ "idclient" , ODN_MODEL_TYPE_INT32, NULL,offsetof(ClientModel,idclient) },
-	{ "ident" , ODN_MODEL_TYPE_STRING, NULL,offsetof(ClientModel,ident) },
-	{ "name" , ODN_MODEL_TYPE_STRING, NULL,offsetof(ClientModel,name) },
-	{ "address" , ODN_MODEL_TYPE_STRING, NULL,offsetof(ClientModel,address) },
-	{ "phone" , ODN_MODEL_TYPE_STRING, NULL,offsetof(ClientModel,phone) },
-	{ "email" , ODN_MODEL_TYPE_STRING, NULL,offsetof(ClientModel,email) },
-	{ "contact" , ODN_MODEL_TYPE_STRING, NULL,offsetof(ClientModel,contact) }
-    },
-    sizeof(ClientModel)
-};
-
 static OdnModelClass UserModelClass = {
     "UserModel",
     3,
@@ -44,14 +29,32 @@ static OdnModelClass UserModelClass = {
     sizeof(UserModel)
 };
 
-OdnModelClass *
-client_model_get_class(void)
-{
-  return &ClientModelClass;
-}
+
 
 OdnModelClass *
 user_model_get_class(void)
 {
   return &UserModelClass;
+}
+
+
+gboolean
+user_model_check(sqlite3 * db,
+	       UserModel * model,
+	       GError ** error)
+{
+  gboolean exists = FALSE;
+  sqlite3_stmt * stmt = NULL;
+  if(sqlite3_prepare(db,"SELECT iduser FROM user WHERE name = ? AND password = ?",-1,&stmt,NULL) == SQLITE_OK)
+    {
+      sqlite3_bind_text(stmt,1,model->name,-1,NULL);
+      sqlite3_bind_text(stmt,2,model->password,-1,NULL);
+      if(sqlite3_step(stmt) == SQLITE_ROW)
+	{
+	  model->iduser = sqlite3_column_int(stmt,0);
+	  exists = TRUE;
+	}
+      sqlite3_finalize(stmt);
+    }
+  return exists;
 }

@@ -58,24 +58,12 @@ controller_default_login(ControllerDefault * self,
 
   if(user)
     {
-      gboolean autenticated = FALSE;
-      sqlite3_stmt * query = NULL;
-      if(sqlite3_prepare(
-	  common_session_get_database(session),
-	  "SELECT iduser FROM user WHERE name = ? AND password = ?",
-	  -1,
-	  &query,
-	  NULL) == SQLITE_OK)
-	{
-	  sqlite3_bind_text(query,1,user->name,-1,NULL);
-	  sqlite3_bind_text(query,2,user->password,-1,NULL);
+      gboolean autenticated =
+	  user_model_check(common_session_get_database(session),user,error);
 
-	  if(sqlite3_step(query) == SQLITE_ROW)
-	      autenticated = TRUE;
-	  sqlite3_finalize(query);
-	}
       common_session_set_authenticated(session,autenticated);
       odn_model_free(user);
+
       if(autenticated)
 	return odn_content_result_new("{ \"done\": true }",-1, "application/json");
       else

@@ -4,17 +4,23 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../main.c 
+../ondina/http/httppackage.c \
+../ondina/http/httprequest.c \
+../ondina/http/httpresponse.c 
 
 OBJS += \
-./main.o 
+./ondina/http/httppackage.o \
+./ondina/http/httprequest.o \
+./ondina/http/httpresponse.o 
 
 C_DEPS += \
-./main.d 
+./ondina/http/httppackage.d \
+./ondina/http/httprequest.d \
+./ondina/http/httpresponse.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
-%.o: ../%.c
+ondina/http/%.o: ../ondina/http/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cross GCC Compiler'
 	gcc -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I"/home/ramiro/git/ondina/ondina" -I"/home/ramiro/git/ondina/application" -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"

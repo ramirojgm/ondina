@@ -15,17 +15,21 @@
 	along with the this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPLICATION_H_
-#define APPLICATION_H_
+#ifndef APPLICATION_MODEL_H_
+#define APPLICATION_MODEL_H_
 
-#include <ondina.h>
+typedef struct
+{
+  OdnModel parent;
+  gint32  iduser;
+  gchar * name;
+  gchar * password;
+} UserModel;
 
-#include <common/session.h>
+OdnModelClass * user_model_get_class(void);
 
-#include <data/usermodel.h>
-#include <data/clientmodel.h>
+gboolean user_model_check(sqlite3 * db,
+			  UserModel * model,
+			  GError ** error);
 
-#include <controller/defaultcontroller.h>
-#include <controller/clientcontroller.h>
-
-#endif /* APPLICATION_H_ */
+#endif /* APPLICATION_MODEL_H_ */

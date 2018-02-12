@@ -36,18 +36,7 @@ controller_client_index(ControllerClient * self,
     return odn_redirect_result_new("/");
 
   OdnViewModelRoot * model = (OdnViewModelRoot *)odn_model_new(ODN_VIEW_MODEL_ROOT);
-  for(guint index = 0;index < 1000; index++)
-    {
-      ClientModel * row = odn_model_new(CLIENT_MODEL);
-      row->idclient = index + 1;
-      row->name = g_strdup("Ninguna");
-      row->ident = g_strdup("Ninguna");
-      row->phone = g_strdup("Ninguna");
-      row->address = g_strdup("Ninguna");
-      row->email = g_strdup("Ninguna");
-      row->contact = g_strdup("Ninguna");
-      model->root = g_list_append(model->root,row);
-    }
+  model->root = client_model_get_all(common_session_get_database(session),error);
 
   return odn_view_result_new(
       "client.view",
@@ -62,20 +51,15 @@ controller_client_get(ControllerClient * self,
   CommonSession * session = odn_context_get_session(context);
   if(common_session_get_authenticated(session))
     {
-      GList * content = NULL;
-      for(guint index = 0;index < 1000; index++)
+      sqlite3 * db = common_session_get_database(session);
+      gint idclient = 0;
+
+      if(odn_context_get_params(context,"idclient",G_TYPE_INT,&idclient,NULL))
 	{
-	  ClientModel * row = odn_model_new(CLIENT_MODEL);
-	  row->idclient = index + 1;
-	  row->name = g_strdup("Ninguna á");
-	  row->ident = g_strdup("Ninguna");
-	  row->phone = g_strdup("Ninguna");
-	  row->address = g_strdup("Ninguna");
-	  row->email = g_strdup("Ninguna");
-	  row->contact = g_strdup("Ninguna");
-	  content = g_list_append(content,row);
+	  ClientModel * response = client_model_get(db,idclient,error);
+	  return odn_json_result_new(response,FALSE);
 	}
-      return odn_json_result_new(content,TRUE);
+      return NULL;
     }
   else
     {
@@ -83,7 +67,81 @@ controller_client_get(ControllerClient * self,
     }
 }
 
+static OdnResult *
+controller_client_insert(ControllerClient * self,
+			OdnContext * context,
+			GError ** error)
+{
+  CommonSession * session = odn_context_get_session(context);
+  if(common_session_get_authenticated(session))
+    {
+      sqlite3 * db = common_session_get_database(session);
 
+      ClientModel * client = odn_model_from_string(
+	  CLIENT_MODEL,
+	  odn_context_get_body(context),
+	  odn_context_get_body_size(context)
+	  ,error);
+
+      if(client)
+	{
+	  client_model_insert(db,client,error);
+	  return odn_json_result_new(client,FALSE);
+	}
+
+      return NULL;
+    }
+  else
+    {
+      return NULL;
+    }
+}
+
+static OdnResult *
+controller_client_update(ControllerClient * self,
+			OdnContext * context,
+			GError ** error)
+{
+  CommonSession * session = odn_context_get_session(context);
+  if(common_session_get_authenticated(session))
+    {
+      sqlite3 * db = common_session_get_database(session);
+
+      ClientModel * client = odn_model_from_string(
+	  CLIENT_MODEL,
+	  odn_context_get_body(context),
+	  odn_context_get_body_size(context)
+	  ,error);
+
+      if(client)
+	{
+	  client_model_update(db,client,error);
+	  return odn_json_result_new(client,FALSE);
+	}
+
+      return NULL;
+    }
+  else
+    {
+      return NULL;
+    }
+}
+
+static OdnResult *
+controller_client_delete(ControllerClient * self,
+			OdnContext * context,
+			GError ** error)
+{
+  CommonSession * session = odn_context_get_session(context);
+  if(common_session_get_authenticated(session))
+    {
+      return NULL;
+    }
+  else
+    {
+      return NULL;
+    }
+}
 
 /* client type implementation */
 
@@ -105,6 +163,25 @@ controller_client_init(ControllerClient * self)
 		     (OdnControllerAction)controller_client_get,
 		     NULL,
 		     NULL);
+
+ odn_controller_bind(ODN_CONTROLLER(self),
+		     "/insert",
+		     (OdnControllerAction)controller_client_insert,
+		     NULL,
+		     NULL);
+
+ odn_controller_bind(ODN_CONTROLLER(self),
+		     "/update",
+		     (OdnControllerAction)controller_client_update,
+		     NULL,
+		     NULL);
+
+ odn_controller_bind(ODN_CONTROLLER(self),
+		     "/delete",
+		     (OdnControllerAction)controller_client_delete,
+		     NULL,
+		     NULL);
+
 
 }
 

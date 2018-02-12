@@ -39,17 +39,16 @@ OdnContext *	odn_context_new(OdnApplication * app,
 				gsize body_size,
 				gpointer session);
 
+gboolean	odn_context_get_params(OdnContext * context,...);
+
 OdnApplication *odn_context_get_application(OdnContext * context);
 
 HttpRequest * 	odn_context_get_request(OdnContext * context);
 
-const gchar * 	odn_context_get_params(OdnContext * context);
 
 const gchar *	odn_context_get_body(OdnContext * context);
 
 gsize		odn_context_get_body_size(OdnContext * context);
-
-gpointer	odn_context_parse_object(OdnContext * context,GType object_type);
 
 gpointer	odn_context_get_session(OdnContext * context);
 

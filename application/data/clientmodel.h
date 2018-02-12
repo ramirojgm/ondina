@@ -15,8 +15,8 @@
 	along with the this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPLICATION_MODEL_H_
-#define APPLICATION_MODEL_H_
+#ifndef APPLICATION_CLIENTMODEL_H_
+#define APPLICATION_CLIENTMODEL_H_
 
 #define CLIENT_MODEL (client_model_get_class())
 
@@ -32,16 +32,26 @@ typedef struct
   gchar * contact;
 } ClientModel;
 
-typedef struct
-{
-  OdnModel parent;
-  gint32  iduser;
-  gchar * name;
-  gchar * password;
-} UserModel;
-
 OdnModelClass * client_model_get_class(void);
 
-OdnModelClass * user_model_get_class(void);
+GList * client_model_get_all(sqlite3 * db,
+			     GError ** error);
 
-#endif /* APPLICATION_MODEL_H_ */
+ClientModel * client_model_get(sqlite3 * db,
+			       gint idclient,
+			       GError ** error);
+
+gboolean client_model_insert(sqlite3 * db,
+			     ClientModel * model,
+			     GError ** error);
+
+gboolean client_model_update(sqlite3 * db,
+			     ClientModel * model,
+			     GError ** error);
+
+gboolean client_model_delete(sqlite3 * db,
+			     ClientModel * model,
+			     GError ** error);
+
+
+#endif /* APPLICATION_CLIENTMODEL_H_ */

@@ -68,8 +68,8 @@ odn_json_result_prepare(OdnResult * result,
   OdnJSONResult * self = (OdnJSONResult*)result;
   http_package_set_string(HTTP_PACKAGE(response),
 			  "Content-Type",
-			  "application/json",
-			  16);
+			  "application/json; charset=UTF-8",
+			  31);
   if(self->is_array)
     {
       GString * buffer = g_string_new("[");
@@ -95,9 +95,9 @@ odn_json_result_prepare(OdnResult * result,
   else
     {
       if(self->data)
-	  self->data = odn_model_to_string(self->data);
+	  self->result = odn_model_to_string(self->data);
       else
-	  self->data = g_strdup("null");
+	  self->result = g_strdup("null");
     }
 }
 

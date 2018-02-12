@@ -223,6 +223,31 @@ odn_parser_is_end(OdnParser * parser)
   return priv->cur_word == NULL;
 }
 
+gchar *
+odn_parser_extract_string(const gchar * str)
+{
+  if(!str) return NULL;
+
+  if((g_str_has_prefix(str,"'") && g_str_has_suffix(str,"'"))||
+      (g_str_has_prefix(str,"\"") && g_str_has_suffix(str,"\"")))
+    {
+      gsize str_length = g_utf8_strlen(str,G_MAXINT32);
+      gchar * plain = g_strndup(str + 1,str_length - 2);
+      gchar * utf8_encoded = g_utf8_make_valid(plain,-1);
+      gchar * result = g_strcompress(utf8_encoded);
+      g_free(plain);
+      g_free(utf8_encoded);
+      return result;
+    }
+  else
+    {
+      if(g_strcmp0(str,"null") == 0)
+	return NULL;
+
+      return g_strdup(str);
+    }
+}
+
 gboolean
 odn_parser_is_next_word(OdnParser * parser,const gchar * str)
 {

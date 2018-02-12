@@ -12,6 +12,7 @@ RM := rm -rf
 -include ondina/app/subdir.mk
 -include application/data/subdir.mk
 -include application/controller/subdir.mk
+-include application/common/subdir.mk
 -include subdir.mk
 -include objects.mk
 
@@ -41,22 +42,21 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: ondina
+all: ondinad
 
 # Tool invocations
-ondina: $(OBJS) $(USER_OBJS)
+ondinad: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross G++ Linker'
-	g++ -L../ -o "ondina" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++  -o "ondinad" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(CC_DEPS)$(C++_DEPS)$(EXECUTABLES)$(OBJS)$(C_UPPER_DEPS)$(CXX_DEPS)$(C_DEPS)$(CPP_DEPS) ondina
+	-$(RM) $(CC_DEPS)$(C++_DEPS)$(EXECUTABLES)$(OBJS)$(C_UPPER_DEPS)$(CXX_DEPS)$(C_DEPS)$(CPP_DEPS) ondinad
 	-@echo ' '
 
 .PHONY: all clean dependents
-.SECONDARY:
 
 -include ../makefile.targets

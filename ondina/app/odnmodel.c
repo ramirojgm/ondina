@@ -49,26 +49,19 @@ odn_model_class_find(OdnModelClass * klass,const gchar * name)
   return NULL;
 }
 
-static gchar*
-_odn_get_string(const gchar * str)
-{
-  return g_strndup(str + 1,g_utf8_strlen(str,G_MAXINT32) - 2);
-}
-
-static gpointer
+static gboolean
 _odn_model_parse(OdnModelClass * klass,
+		 gpointer model,
 		 OdnParser * parser,
 		 GError ** error)
 {
-  gpointer model = odn_model_new(klass);
   gboolean done = TRUE;
-
   if(odn_parser_next_word_check(parser,"{"))
     {
       do{
 	  if(odn_parser_check_is_string(parser))
 	    {
-	      g_autofree gchar * member_name =  _odn_get_string(odn_parser_next_word(parser,NULL,TRUE));
+	      g_autofree gchar * member_name =  odn_parser_extract_string(odn_parser_next_word(parser,NULL,TRUE));
 	      if(odn_parser_next_word_check(parser,":"))
 		{
 		  OdnModelAttribute * attr = odn_model_class_find(klass,member_name);
@@ -89,16 +82,7 @@ _odn_model_parse(OdnModelClass * klass,
 			    *((gchar*)(model + attr->offset)) = *(odn_parser_next_word(parser,NULL,TRUE) + 1);
 			  break;
 			case ODN_MODEL_TYPE_STRING:
-			  {
-			    gchar * str ;
-			    if(odn_parser_next_word_check(parser,"null"))
-			      str = NULL;
-			    else if(odn_parser_check_is_string(parser))
-			      str = _odn_get_string(odn_parser_next_word(parser,NULL,TRUE));
-			    else
-			      str = g_strdup(odn_parser_next_word(parser,NULL,TRUE));
-			    *((gchar**)(model + attr->offset)) = str;
-			  }
+			  *((gchar**)(model + attr->offset)) = odn_parser_extract_string(odn_parser_next_word(parser,NULL,TRUE));
 			  break;
 			case ODN_MODEL_TYPE_FLOAT:
 			  *((gfloat*)(model + attr->offset)) = atof(odn_parser_next_word(parser,NULL,TRUE));
@@ -122,7 +106,21 @@ _odn_model_parse(OdnModelClass * klass,
 			    {
 			      do
 				{
-				  odn_parser_next_word(parser,NULL,TRUE);
+				  if(odn_parser_next_word_check(parser,"null")||
+				     odn_parser_next_word_check(parser,"undefined"))
+				    {
+				      odn_model_add_null(model,member_name);
+				    }
+				  else
+				    {
+				      gpointer child = odn_model_add(model,member_name);
+				      if(!_odn_model_parse(((OdnModel*)child)->klass,child,parser,error))
+					{
+					  odn_model_remove(model,member_name,child);
+					  odn_model_free(child);
+					  done = FALSE;
+					}
+				    }
 				}
 			      while(odn_parser_next_word_check(parser,",") && !odn_parser_is_end(parser));
 			      if(done)
@@ -133,6 +131,8 @@ _odn_model_parse(OdnModelClass * klass,
 			      done = FALSE;
 			      break;
 			    }
+			  break;
+			case ODN_MODEL_TYPE_INVALID:
 			  break;
 		      }
 		    }
@@ -160,20 +160,15 @@ _odn_model_parse(OdnModelClass * klass,
     }
 
 
-  if(done)
-    {
-      return model;
-    }
-  else
+  if(!done && error && !*error)
     {
       *error = g_error_new(
 	  g_quark_from_static_string("odn-model-error"),
 	  0,
 	  "bad syntaxes exception");
-
-      odn_model_free(model);
-      return NULL;
     }
+
+  return done;
 }
 
 gpointer
@@ -184,7 +179,12 @@ odn_model_from_string(OdnModelClass * klass,
 {
   OdnParser * p = odn_parser_new();
   odn_parser_parse(p,str,length);
-  gpointer model = _odn_model_parse(klass,p,error);
+  gpointer model = odn_model_new(klass);
+  if(!_odn_model_parse(klass,model,p,error))
+    {
+      odn_model_free(model);
+      model = NULL;
+    }
   g_object_unref(p);
   return model;
 }
@@ -392,6 +392,21 @@ odn_model_add(gpointer model,
 	}
     }
   return NULL;
+}
+
+void
+odn_model_add_null(gpointer model,
+		 const gchar * name)
+{
+  OdnModelAttribute * attr = odn_model_find(model,name);
+  if(attr)
+    {
+      GList ** attr_ptr = ((GList **)(model + attr->offset));
+      if(attr->klass)
+	{
+	  *attr_ptr = g_list_append(*attr_ptr,NULL);
+	}
+    }
 }
 
 GList *

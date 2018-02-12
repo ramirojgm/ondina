@@ -37,6 +37,8 @@ gboolean	odn_parser_skip(OdnParser * parser);
 
 gboolean	odn_parser_is_end(OdnParser * parser);
 
+gchar *		odn_parser_extract_string(const gchar * str);
+
 gboolean	odn_parser_is_next_word(OdnParser * parser,const gchar * word);
 
 const gchar *	odn_parser_next_word(OdnParser * parser,gsize * length,gboolean move);
